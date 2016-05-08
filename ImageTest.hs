@@ -8,6 +8,19 @@ import Codec.Picture.Types
 import System.FilePath.Posix (splitExtension)
 import Data.FileEmbed
 import qualified Data.ByteString
+import qualified Vision.Image as I
+import Vision.Image.JuicyPixels as FJI
+import Codec.Picture.Saving()
+import Codec.Picture.Jpg()
+
+import Vision.Primitive()
+import qualified Vision.Image as I
+import Vision.Image.JuicyPixels as FJI
+
+import Codec.Picture as JP
+import qualified Data.ByteString()
+--import Data.FileEmbed
+
 
 rgba8Png :: FilePath
 rgba8Png = "/Users/dwinters/Dev/Haskell/ImageTest/ImageTest.hsproj/test/DSC_0429.jpg"
@@ -29,10 +42,24 @@ accumPixels img@(Image w h _) = [ format (pixelAt img x y) x y | x <- [0..w], y 
                                               ++ show b ++ "$"
                                               ++ show j ++ "$"
                                               ++ show k ++ "*\n"
+                                              
+isMiddlePixelRed :: FilePath -> IO ()
+isMiddlePixelRed fpin = do
+    image <- readImage fpin 
+    case image of
+      Left _ -> putStrLn $ "Sorry, not a supported codec for " ++ fpin
+      Right dynimg -> do
+        let rgba = fromDynamicImage dynimg
+        let fridayImg = FJI.toFridayRGBA  rgba
+        let juicyImg = FJI.toJuicyRGBA fridayImg
+        let (name, _) = splitExtension fpin
+        let converted    = encodeDynamicPng $ ImageRGBA8 juicyImg
+        savePngImage (name ++ ".png") $ ImageRGBA8 juicyImg 
+      
 
 
 -- Copied from
--- See http://hackage.haskell.org/package/JuicyPixels-util-0.2/docs/Codec-Picture-RGBA8.html
+-- See http://hackage.hasll.org/package/JuicyPixels-util-0.2/docs/Codec-Picture-RGBA8.html
 
 class ToPixelRGBA8 a where
     toRGBA8 :: a -> PixelRGBA8
@@ -63,4 +90,5 @@ fromDynamicImage (ImageRGBA8 img) = img
 
 -- end of Codec.Picture.RGBA8
 
-main = do putStr "Hello World"
+--main = isMiddlePixelRed rgba8Png
+main = isMiddlePixelRed rgba8Png 
